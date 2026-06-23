@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manikanta Customer Dealer CRM</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-dark: #0B0F19;
+            --bg-glass: rgba(255,255,255,0.08);
+            --glass-blur: 10px;
+            --primary: hsl(210, 70%, 56%);
+            --accent: hsl(340, 70%, 55%);
+            --text-light: #E0E6ED;
+            --text-muted: #7A8499;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-light); height:100vh; overflow:hidden; }
+        /* Glassmorphic login overlay */
+        #loginOverlay {
+            position: fixed;
+            inset:0;
+            backdrop-filter: blur(5px);
+            background: var(--bg-glass);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            z-index:1000;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 2rem 3rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            backdrop-filter: blur(var(--glass-blur));
+            text-align:center;
+            max-width:360px;
+            width:100%;
+        }
+        .login-card h1 { margin-bottom:1rem; font-weight:600; color: var(--primary); }
+        .login-card p { margin-bottom:1.5rem; color: var(--text-muted); }
+        #google-signin-btn { display:inline-block; }
+        /* Main dashboard layout */
+        #dashboard {
+            display:none;
+            height:100%;
+            overflow:auto;
+            padding:1rem;
+        }
+        header { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 1rem; background: rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.1); }
+        nav { margin-top:1rem; }
+        .panel { background: var(--bg-glass); border-radius:8px; padding:1rem; margin-bottom:1rem; backdrop-filter: blur(var(--glass-blur)); }
+        .panel h2 { margin-bottom:0.5rem; color: var(--primary); }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:0.5rem; border-bottom:1px solid rgba(255,255,255,0.1); }
+        th { text-align:left; color: var(--accent); }
+        tr:hover { background: rgba(255,255,255,0.04); }
+        button { background: var(--primary); color:#fff; border:none; border-radius:4px; padding:0.4rem 0.8rem; cursor:pointer; }
+        button:hover { background: hsl(210,70%,66%); }
+        .error { color:#FF6B6B; margin-top:0.5rem; }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h1>Manikanta CRM</h1>
+            <p>Sign in with Google to continue</p>
+            <div id="google-signin-btn"></div>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <header>
+            <h2>Dashboard</h2>
+            <button id="logoutBtn">Logout</button>
+        </header>
+        <nav>
+            <button data-view="leads">Leads</button>
+            <button data-view="followups">Follow‑Ups</button>
+            <button data-view="workflow">Workflow Logs</button>
+        </nav>
+        <section id="contentArea">
+            <!-- Panels will be injected by JS -->
+        </section>
+    </div>
+
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer
+        onerror="console.warn('[UNEXPECTED_ISSUE] GSI SDK failed to load from CDN');"></script>
+    <script src="static/js/crm.js" defer></script>
+</body>
+</html>

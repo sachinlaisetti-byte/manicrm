@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manikanta Enterprises - Customer & Dealer CRM</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Identity Services (Google Sign-In API) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Google Sign-In Initialization (domain-safe) -->
+    <script>
+        function handleGoogleCredentialResponse(response) {
+            if (response && response.credential) {
+                handleGoogleLogin(response.credential);
+            }
+        }
+
+        function safeInitGoogle() {
+            try {
+                if (typeof window.google !== 'undefined' && window.google.accounts && window.google.accounts.id) {
+                    google.accounts.id.initialize({
+                        client_id: "575061568101-4lt1m9eabuv7q7jdqps1hj568b4ch4hd.apps.googleusercontent.com",
+                        callback: handleGoogleCredentialResponse,
+                        auto_select: false,
+                        itp_support: true
+                    });
+                    var btn = document.getElementById("google-signin-btn-hidden");
+                    if (btn) google.accounts.id.renderButton(btn, { theme: 'outline', size: 'large', width: 240 });
+                }
+            } catch (err) {
+                console.warn('[UNEXPECTED_ISSUE] AuthService client initialization failed:', err);
+            }
+        }
+
+        window.onload = function() {
+            safeInitGoogle();
+        };
+    </script>
+    
+    <!-- CSS Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    
+    <!-- ================= AUTHENTICATION CONTAINER (SPLIT UI) ================= -->
+    <div class="auth-wrapper" id="auth-container">
+        <div class="auth-left">
+            <div class="auth-brand">
+                <div class="logo-icon">M</div>
+                <div class="logo-text">
+                    <h1>Manikanta Enterprises</h1>
+                    <span>Distribution and Logistics Command</span>
+                </div>
+            </div>
+            
+            <div class="auth-hero-content">
+    <h2>Welcome to Manikanta Enterprises</h2>
+    <p>Manikanta Enterprises is a leading provider of end-to-end logistics, distribution, and dealer management solutions. Our platform empowers businesses with real-time visibility, efficient workflow automation, and seamless communication across the supply chain.</p>
+</div>
+            
+            <div class="auth-stats-row">
+                <div class="stat-box">
+                    <strong>24/7</strong>
+                    <span>DISPATCH VISIBILITY</span>
+                </div>
+                <div class="stat-box">
+                    <strong>Live</strong>
+                    <span>ROUTE WORKFLOW STATUS</span>
+                </div>
+                <div class="stat-box">
+                    <strong>AI</strong>
+                    <span>CUSTOMER MESSAGE PREVIEW</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-right">
+            <div class="auth-card glass-panel">
+                <div class="auth-card-header">
+                    <span class="secure-tag"><i data-lucide="shield-check"></i> SECURE STAFF PORTAL</span>
+                    <h2 id="auth-title">Welcome Back</h2>
+                    <p id="auth-desc">Sign in with your registered staff account to open the Dispatch Operations Terminal.</p>
+                </div>
+                
+                <!-- Tab Menu for Login vs Register -->
+                <div class="auth-tab-menu">
+                    <button class="auth-tab-btn active" id="btn-tab-signin" onclick="toggleAuthTab('signin')">Sign In</button>
+                    <button class="auth-tab-btn" id="btn-tab-register" onclick="toggleAuthTab('register')">Create Account</button>
+                </div>
+                
+                <!-- Google Authentication Wrapper -->
+                <div class="google-auth-box">
+                    <button type="button" class="btn-google-signin" id="btn-google-signin" onclick="triggerGoogleSignIn()">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                    <!-- Hidden GSI rendered button (used for OAuth popup flow) -->
+                    <div id="google-signin-btn-hidden" style="display:none; position:absolute;"></div>
+                </div>
+                
+                <div class="auth-divider">
+                    <span>OR</span>
+                </div>
+                
+                <!-- Native Forms -->
+                <form id="form-auth-native">
+                    <div class="form-group" id="group-full-name" style="display: none;">
+                        <label for="auth-fullname">Full Name</label>
+                        <input type="text" id="auth-fullname" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-username">Business Email / Username</label>
+                        <input type="text" id="auth-username" required placeholder="operations@manikanta.in">
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" required placeholder="Enter password">
+                    </div>
+                    
+                    <div class="auth-actions-row" id="auth-actions-signin">
+                        <label class="remember-me">
+                            <input type="checkbox" id="auth-remember">
+                            <span>Remember me</span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block mt-20" id="btn-auth-submit">
+                        Access Dashboard
+                    </button>
+                    
+                    <div class="auth-footer-badges">
+                        <span>VERIFIED</span>
+                        <span>ENCRYPTED</span>
+                        <span>STAFF ONLY</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP RUNTIME CONTAINER ================= -->
+    <div class="app-container" id="app-runtime-container" style="display: none;">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon">M</div>
+                <div class="logo-text">
+                    <h1>Manikanta</h1>
+                    <span>Enterprises CRM</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="orders">
+                    <i data-lucide="shopping-cart"></i>
+                    <span>Goods Order Form</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="stock">
+                    <i data-lucide="warehouse"></i>
+                    <span>Warehouse Stock</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="crm">
+                    <i data-lucide="users"></i>
+                    <span>Dealer & Customer CRM</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="deliveries">
+                    <i data-lucide="truck"></i>
+                    <span>Deliveries & Dispatch</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="credit">
+                    <i data-lucide="credit-card"></i>
+                    <span>Credit Sales Tracker</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="vendors">
+                    <i data-lucide="package-plus"></i>
+                    <span>Vendor Purchases</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="profitability">
+                    <i data-lucide="trending-up"></i>
+                    <span>Profitability</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="insights">
+                    <i data-lucide="sparkles"></i>
+                    <span>AI Sales Insights</span>
+                </button>
+                <a href="#" class="menu-item" data-tab="followups">
+                    <i data-lucide="calendar"></i>
+                    <span>Follow-ups</span>
+                    <span class="badge badge-risk" id="badge-followup-alerts" style="display:none;">0</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="logs">
+                    <i data-lucide="clipboard-list"></i>
+                    <span>Workflow Logs</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="current-user-avatar">AD</div>
+                    <div class="user-info">
+                        <h3 id="current-user-name">Admin Portal</h3>
+                        <span onclick="handleSignOut()" style="color:var(--color-danger); cursor:pointer; font-weight:600;"><i data-lucide="log-out" style="width:10px; height:10px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>Sign Out</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Application Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-search">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search customer, order, or SKU..." id="global-search">
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="btn-refresh" title="Refresh Dashboard Data">
+                        <i data-lucide="refresh-cw"></i>
+                    </button>
+                    <div class="notification-bell" id="notification-bell-wrapper">
+                        <i data-lucide="bell"></i>
+                        <span class="bell-dot" id="bell-dot-alert" style="display:none;"></span>
+                        <span class="notif-badge" id="notif-badge-count" style="display:none;">0</span>
+
+                        <!-- Notification Dropdown Panel -->
+                        <div class="notif-dropdown hidden" id="notif-dropdown-panel">
+                            <div class="notif-dropdown-header">
+                                <span class="notif-dropdown-title">
+                                    <i data-lucide="bell" style="width:14px;height:14px;margin-right:6px;vertical-align:middle;"></i>
+                                    System Notifications
+                                </span>
+                                <button class="notif-mark-all" id="btn-mark-all-read" onclick="markAllNotificationsRead(event)">
+                                    Mark all read
+                                </button>
+                            </div>
+                            <div class="notif-dropdown-body" id="notif-dropdown-body">
+                                <div class="notif-empty-state">
+                                    <i data-lucide="check-circle" style="width:32px;height:32px;margin-bottom:10px;opacity:0.4;"></i>
+                                    <p>No pending notifications</p>
+                                </div>
+                            </div>
+                            <div class="notif-dropdown-footer">
+                                <span style="font-size:11px; color:var(--text-muted, #6b7280);">Auto-refreshes on open</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="current-time" id="header-time">June 17, 2026</div>
+                </div>
+            </header>
+            
+            <div class="content-body">
+                
+                <!-- TAB 1: DASHBOARD -->
+                <section class="tab-pane active" id="pane-dashboard">
+                    <div class="page-title">
+                        <h2>Operational Overview</h2>
+                        <p>Real-time metrics, warehouse inventory summary, and pending collections status.</p>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card card-revenue">
+                            <div class="card-header">
+                                <span>TOTAL REVENUE</span>
+                                <div class="card-icon"><i data-lucide="indian-rupee"></i></div>
+                            </div>
+                            <h3 id="metric-revenue">Rs 0.00</h3>
+                            <span class="card-change">Cumulative sales orders logged</span>
+                        </div>
+                        
+                        <div class="metric-card card-outstanding">
+                            <div class="card-header">
+                                <span>CREDIT OUTSTANDING</span>
+                                <div class="card-icon"><i data-lucide="alert-circle"></i></div>
+                            </div>
+                            <h3 id="metric-outstanding">Rs 0.00</h3>
+                            <span class="card-change text-warning">Pending collections dues</span>
+                        </div>
+                        
+                        <div class="metric-card card-dealers">
+                            <div class="card-header">
+                                <span>ACTIVE DEALERS</span>
+                                <div class="card-icon"><i data-lucide="check-square"></i></div>
+                            </div>
+                            <h3 id="metric-dealers">0</h3>
+                            <span class="card-change">Regular supply accounts</span>
+                        </div>
+                        
+                        <div class="metric-card card-stock-alert">
+                            <div class="card-header">
+                                <span>LOW STOCK ALERT</span>
+                                <div class="card-icon"><i data-lucide="alert-triangle"></i></div>
+                            </div>
+                            <h3 id="metric-stock-alert">0</h3>
+                            <span class="card-change text-danger" id="text-stock-alert">SKUs below safety threshold</span>
+                            <span class="card-change text-warning">Overdue Follow-ups: <strong id="badge-ai-alerts">0</strong></span>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-details">
+                        <div class="glass-panel chart-panel">
+                            <h3>Category Sales Distribution</h3>
+                            <div class="chart-container">
+                                <canvas id="chartCategorySales"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel recent-panel">
+                            <div class="panel-header">
+                                <h3>Recent Sales Orders</h3>
+                                <button class="btn btn-sm btn-outline" onclick="switchTab('orders')">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Dealer/Customer</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-recent-orders">
+                                        <tr><td colspan="5" class="text-center">Loading transactions...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 2: GOODS ORDER FORM -->
+                <section class="tab-pane" id="pane-orders">
+                    <div class="page-title">
+                        <h2>Goods Order Form</h2>
+                        <p>Record wholesale sales orders for registered dealers and customers.</p>
+                    </div>
+                    
+                    <div class="form-layout glass-panel">
+                        <form id="form-create-order">
+                            <div class="form-section">
+                                <h3>Order Configuration</h3>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="order-dealer-select">Select Dealer / Customer <span class="text-danger">*</span></label>
+                                        <select id="order-dealer-select" required>
+                                            <option value="">-- Choose Account --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="order-payment-status">Payment Status</label>
+                                        <select id="order-payment-status">
+                                            <option value="Pending">Pending (On Credit)</option>
+                                            <option value="Paid">Paid Upfront</option>
+                                            <option value="Partial">Partial Payment</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <div class="section-title-action">
+                                    <h3>Order Items</h3>
+                                    <button type="button" class="btn btn-sm btn-outline" id="btn-add-order-item">
+                                        <i data-lucide="plus"></i> Add Item
+                                    </button>
+                                </div>
+                                <div class="order-items-container" id="order-items-list"></div>
+                                <div class="order-total-bar">
+                                    <span>Total Price Estimation:</span>
+                                    <strong id="order-total-price">Rs 0.00</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="btn-submit-order">
+                                    <i data-lucide="shopping-cart"></i> Submit Sales Order
+                                </button>
+                                <button type="reset" class="btn btn-secondary" onclick="resetOrderForm()">Clear Form</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="glass-panel data-list-panel mt-20">
+                        <h3>All Sales Orders Log</h3>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Dealer / Customer</th>
+                                        <th>Phone</th>
+                                        <th>Order Date</th>
+                                        <th>Items Ordered</th>
+                                        <th>Total Amount</th>
+                                        <th>Lifecycle Status</th>
+                                        <th>Dispatch Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sales-orders-list-table">
+                                    <tr><td colspan="8" class="text-center">Loading orders list...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 3: WAREHOUSE STOCK -->
+                <section class="tab-pane" id="pane-stock">
+                    <div class="page-title">
+                        <h2>Warehouse Stock Entry</h2>
+                        <p>Monitor real-time inventory levels, bin locations, and safety limits.</p>
+                    </div>
+                    
+                    <div class="grid-2-1">
+                        <div class="glass-panel">
+                            <h3>Current Stock Catalogue</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>SKU Code</th>
+                                            <th>Category</th>
+                                            <th>Wholesale Price</th>
+                                            <th>Cost Price</th>
+                                            <th>Qty in Stock</th>
+                                            <th>Safety Thr.</th>
+                                            <th>Bin Location</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stock-list-table">
+                                        <tr><td colspan="9" class="text-center">Loading inventory data...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel">
+                            <h3>Adjust Stock Level</h3>
+                            <form id="form-update-stock">
+                                <div class="form-group">
+                                    <label for="stock-product-select">Select Product <span class="text-danger">*</span></label>
+                                    <select id="stock-product-select" required>
+                                        <option value="">-- Choose Product --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock-qty-input">New Quantity in Stock <span class="text-danger">*</span></label>
+                                    <input type="number" id="stock-qty-input" min="0" required placeholder="e.g. 150">
+                                </div>
+                                <div class="form-group">
+                                    <label for="stock-bin-input">Bin Location</label>
+                                    <input type="text" id="stock-bin-input" placeholder="e.g. AISLE-A3">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i data-lucide="edit-3"></i> Save Adjustments
+                                </button>
+                            </form>
+                            
+                            <hr class="panel-divider">
+                            
+                            <h3>Initialize New SKU</h3>
+                            <form id="form-create-product">
+                                <div class="form-group">
+                                    <label for="prod-name">Product Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="prod-name" placeholder="e.g. TATA Steel 16mm" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prod-sku">SKU Code <span class="text-danger">*</span></label>
+                                    <input type="text" id="prod-sku" placeholder="e.g. SKU-STL-TT-16" required>
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="prod-price">Sale Price (Rs) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" id="prod-price" required placeholder="750.00">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-cost">Purchase Cost (Rs) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" id="prod-cost" required placeholder="650.00">
+                                    </div>
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="prod-category">Category</label>
+                                        <input type="text" id="prod-category" placeholder="Cement, Steel, etc.">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-stock">Initial Stock Qty</label>
+                                        <input type="number" id="prod-stock" value="0">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-secondary btn-block">
+                                    <i data-lucide="plus"></i> Add Product & Stock
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 4: CRM (DEALERS & CUSTOMERS) -->
+                <section class="tab-pane" id="pane-crm">
+                    <div class="page-title">
+                        <h2>CRM Hub</h2>
+                        <p>Track business relationships, contact records, and scheduled follow-ups.</p>
+                    </div>
+                    
+                    <!-- Internal CRM Subtabs -->
+                    <div class="crm-subtabs">
+                        <button class="crm-tab-btn active" id="crm-tab-dealers" onclick="switchCRMView('dealers')">Dealers & Retailers</button>
+                        <button class="crm-tab-btn" id="crm-tab-customers" onclick="switchCRMView('customers')">Direct Customers</button>
+                    </div>
+                    
+                    <div class="grid-1-2">
+                        <!-- Add Forms (Swapped dynamically based on CRM subtab) -->
+                        <div class="glass-panel" id="crm-add-dealer-box">
+                            <h3>Register Dealer / Retailer</h3>
+                            <form id="form-create-dealer">
+                                <input type="hidden" id="edit-dealer-id">
+                                <div class="form-group">
+                                    <label for="dl-name">Firm / Dealer Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="dl-name" required placeholder="e.g. Laxmi Traders">
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="dl-type">Relationship Type <span class="text-danger">*</span></label>
+                                        <select id="dl-type" required>
+                                            <option value="Dealer">Dealer</option>
+                                            <option value="Retailer">Retailer Shop</option>
+                                            <option value="Customer">Other Customer</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dl-phone">Phone Number <span class="text-danger">*</span></label>
+                                        <input type="tel" id="dl-phone" required placeholder="10 Digit Number">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dl-email">Email ID</label>
+                                    <input type="email" id="dl-email" placeholder="name@domain.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="dl-address">Business Address</label>
+                                    <textarea id="dl-address" placeholder="Store street address..."></textarea>
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="dl-credit-limit">Credit Limit (Rs)</label>
+                                        <input type="number" id="dl-credit-limit" placeholder="e.g. 50000" value="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dl-owner">Account Executive Owner</label>
+                                        <input type="text" id="dl-owner" placeholder="e.g. Srinivas Rao">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dl-followup">Next Follow Up Date</label>
+                                    <input type="date" id="dl-followup">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" id="btn-submit-dealer">
+                                    <i data-lucide="user-plus"></i> Save CRM Account
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-block mt-10" id="btn-cancel-dealer-edit" style="display:none;" onclick="cancelDealerEdit()">
+                                    Cancel Edit
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Customer Registration Box -->
+                        <div class="glass-panel" id="crm-add-customer-box" style="display: none;">
+                            <h3>Register Direct Customer</h3>
+                            <form id="form-create-customer">
+                                <input type="hidden" id="edit-customer-id">
+                                <div class="form-group">
+                                    <label for="cust-name">Customer Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="cust-name" required placeholder="e.g. Suresh Reddy">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cust-company">Company / Builder Name</label>
+                                    <input type="text" id="cust-company" placeholder="e.g. Suresh Construction">
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="cust-phone">Phone Number <span class="text-danger">*</span></label>
+                                        <input type="tel" id="cust-phone" required placeholder="Phone number">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cust-email">Email ID</label>
+                                        <input type="email" id="cust-email" placeholder="email@domain.com">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cust-address">Site / Delivery Address</label>
+                                    <textarea id="cust-address" placeholder="Enter site address..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cust-owner">Account Executive Owner</label>
+                                    <input type="text" id="cust-owner" placeholder="e.g. Kalyan Kumar">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" id="btn-submit-customer">
+                                    <i data-lucide="user-plus"></i> Save Customer Profile
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-block mt-10" id="btn-cancel-customer-edit" style="display:none;" onclick="cancelCustomerEdit()">
+                                    Cancel Edit
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- CRM Profile lists -->
+                        <div class="dealer-view-container">
+                            <div class="glass-panel" id="dealers-profiles-wrapper">
+                                <h3>Registered CRM Profiles (Dealers)</h3>
+                                <div class="crm-dealers-list" id="crm-dealers-profiles"></div>
+                            </div>
+                            <div class="glass-panel" id="customers-profiles-wrapper" style="display:none;">
+                                <h3>Registered CRM Profiles (Customers)</h3>
+                                <div class="crm-dealers-list" id="crm-customers-profiles"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 5: DELIVERIES -->
+                <section class="tab-pane" id="pane-deliveries">
+                    <div class="page-title">
+                        <h2>Delivery & Dispatch Assignment</h2>
+                        <p>Route planning, vehicle allocation, and transit tracking for customer orders.</p>
+                    </div>
+                    
+                    <div class="grid-1-2">
+                        <div class="glass-panel">
+                            <h3>Assign Dispatch Route</h3>
+                            <form id="form-assign-delivery">
+                                <div class="form-group">
+                                    <label for="del-order-select">Select Pending Order <span class="text-danger">*</span></label>
+                                    <select id="del-order-select" required>
+                                        <option value="">-- Choose Sales Order --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="del-person">Delivery Driver Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="del-person" required placeholder="e.g. Mallesh Yadav">
+                                </div>
+                                <div class="form-group">
+                                    <label for="del-vehicle">Vehicle Number <span class="text-danger">*</span></label>
+                                    <input type="text" id="del-vehicle" required placeholder="e.g. TS-08-H-1234">
+                                </div>
+                                <div class="form-group">
+                                    <label for="del-route">Dispatch Route / Stop Points <span class="text-danger">*</span></label>
+                                    <input type="text" id="del-route" required placeholder="e.g. Nalgonda Outer Ring Road">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i data-lucide="truck"></i> Assign and Dispatch
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="glass-panel">
+                            <h3>Transit Operations Monitor</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Delivery ID</th>
+                                            <th>Order ID</th>
+                                            <th>Dealer / Drop Address</th>
+                                            <th>Driver Details</th>
+                                            <th>Route details</th>
+                                            <th>Date Assigned</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deliveries-list-table">
+                                        <tr><td colspan="8" class="text-center">Loading transit routes...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 6: CREDIT SALES TRACKER -->
+                <section class="tab-pane" id="pane-credit">
+                    <div class="page-title">
+                        <h2>Credit Sales & Collection Tracker</h2>
+                        <p>Track customer credit limit headroom, outstanding collections, and record dues payment receipts.</p>
+                    </div>
+                    
+                    <div class="grid-1-2">
+                        <div class="glass-panel">
+                            <h3>Log Dues Payment Receipt</h3>
+                            <form id="form-record-payment">
+                                <div class="form-group">
+                                    <label for="pay-dealer-select">Select Dealer/Customer Account <span class="text-danger">*</span></label>
+                                    <select id="pay-dealer-select" required>
+                                        <option value="">-- Select Account --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label id="lbl-current-dues" class="help-text">Pending Dues: Rs 0.00</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pay-amount">Amount Collected (Rs) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" id="pay-amount" min="0.01" required placeholder="e.g. 5000">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i data-lucide="check-circle"></i> Log Payment Dues
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="glass-panel">
+                            <h3>Credit Dues & Risk Matrix</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Account Name</th>
+                                            <th>Type</th>
+                                            <th>Credit Limit</th>
+                                            <th>Outstanding Balance</th>
+                                            <th>Headroom Usage</th>
+                                            <th>Status</th>
+                                            <th>Follow-up Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="credit-ledger-table">
+                                        <tr><td colspan="7" class="text-center">Loading credit reports...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 7: VENDOR PURCHASE FORM -->
+                <section class="tab-pane" id="pane-vendors">
+                    <div class="page-title">
+                        <h2>Vendor Purchases (Expense Logs)</h2>
+                        <p>Log warehouse replenishment purchases and factory stock restocks from wholesale suppliers.</p>
+                    </div>
+                    
+                    <div class="grid-1-2">
+                        <div class="glass-panel">
+                            <h3>Record Supplier Replenishment</h3>
+                            <form id="form-vendor-purchase">
+                                <div class="form-group">
+                                    <label for="vendor-name-input">Supplier / Vendor Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="vendor-name-input" required placeholder="e.g. Ultratech Factories Ltd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="vendor-product-select">Select Inventory SKU to Restock <span class="text-danger">*</span></label>
+                                    <select id="vendor-product-select" required>
+                                        <option value="">-- Select SKU --</option>
+                                    </select>
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="vendor-qty">Quantity Restocked <span class="text-danger">*</span></label>
+                                        <input type="number" id="vendor-qty" min="1" required placeholder="e.g. 500">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="vendor-cost">Purchase Cost Unit (Rs) <span class="text-danger">*</span></label>
+                                        <input type="number" step="0.01" id="vendor-cost" required placeholder="e.g. 390.00">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i data-lucide="package-plus"></i> Record Restock & Dues
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="glass-panel">
+                            <h3>Replenishment Orders Log</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Supplier</th>
+                                            <th>Product (SKU)</th>
+                                            <th>Restock Qty</th>
+                                            <th>Unit Cost</th>
+                                            <th>Total Outflow</th>
+                                            <th>Replenish Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendor-purchases-table">
+                                        <tr><td colspan="7" class="text-center">Loading supplier purchases...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 8: PROFITABILITY DASHBOARD -->
+                <section class="tab-pane" id="pane-profitability">
+                    <div class="page-title">
+                        <h2>Profitability Analytics</h2>
+                        <p>Evaluate sales margins, inventory asset valuations, and company net profit balances.</p>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card card-revenue">
+                            <div class="card-header">
+                                <span>TOTAL REVENUE (SALES)</span>
+                                <div class="card-icon"><i data-lucide="bar-chart-2"></i></div>
+                            </div>
+                            <h3 id="margin-revenue">Rs 0.00</h3>
+                        </div>
+                        
+                        <div class="metric-card card-dealers">
+                            <div class="card-header">
+                                <span>COST OF GOODS SOLD (COGS)</span>
+                                <div class="card-icon"><i data-lucide="clipboard-list"></i></div>
+                            </div>
+                            <h3 id="margin-cogs">Rs 0.00</h3>
+                        </div>
+                        
+                        <div class="metric-card card-profit">
+                            <div class="card-header">
+                                <span>GROSS PROFIT</span>
+                                <div class="card-icon"><i data-lucide="trending-up"></i></div>
+                            </div>
+                            <h3 id="margin-profit">Rs 0.00</h3>
+                        </div>
+                        
+                        <div class="metric-card card-outstanding">
+                            <div class="card-header">
+                                <span>GROSS MARGIN RATE</span>
+                                <div class="card-icon"><i data-lucide="percent"></i></div>
+                            </div>
+                            <h3 id="margin-rate">0.0%</h3>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-details">
+                        <div class="glass-panel">
+                            <h3>Wholesale Inventory Valuation</h3>
+                            <div class="valuation-bar-group">
+                                <div class="val-metric">
+                                    <span>Stock Asset Value (At Cost)</span>
+                                    <h4 id="profit-stock-valuation">Rs 0.00</h4>
+                                </div>
+                                <div class="val-metric">
+                                    <span>Gross Vendor Restock Outflows</span>
+                                    <h4 id="profit-vendor-expense">Rs 0.00</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel">
+                            <h3>Product Margin Matrix</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>SKU Product Name</th>
+                                            <th>Units Sold</th>
+                                            <th>Sale Price</th>
+                                            <th>Cost Price</th>
+                                            <th>Margin / Unit</th>
+                                            <th>Profit Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="profitability-table-body">
+                                        <tr><td colspan="6" class="text-center">Loading product margin stats...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 9: AI SALES INSIGHTS -->
+                <section class="tab-pane" id="pane-insights">
+                    <div class="page-title">
+                        <h2>AI Sales Insights & Assistance</h2>
+                        <p>Smart summaries, risk factors, and automated follow-up messages for customer retention.</p>
+                    </div>
+                    
+                    <div class="glass-panel mb-20">
+                        <h3>Relationship Assistant Panel</h3>
+                        <div class="ai-overview">
+                            <div class="ai-icon-large"><i data-lucide="sparkles"></i></div>
+                            <div class="ai-desc">
+                                <h4>Local CRM Intelligence Engine Active</h4>
+                                <p>Scanning accounts, tracking overdue follow-ups, analyzing credit limits, and generating tailored WhatsApp/SMS templates to boost sales performance.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-insights-grid" id="ai-insights-container"></div>
+                </section>
+                
+                <!-- TAB 10: FOLLOW-UPS REMINDERS LAYER -->
+                <section class="tab-pane" id="pane-followups">
+                    <div class="page-title">
+                        <h2>Follow-up Reminders Tracker</h2>
+                        <p>Schedule alerts and log business tasks to streamline operational callbacks.</p>
+                    </div>
+                    
+                    <div class="grid-1-2">
+                        <!-- Scheduling Form -->
+                        <div class="glass-panel">
+                            <h3>Schedule Reminder</h3>
+                            <form id="form-create-followup">
+                                <div class="form-group">
+                                    <label for="fup-title">Task Title <span class="text-danger">*</span></label>
+                                    <input type="text" id="fup-title" required placeholder="e.g. Call Laxmi Traders regarding balances">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fup-notes">Action Details / Notes</label>
+                                    <textarea id="fup-notes" placeholder="Write additional follow-up task contexts..."></textarea>
+                                </div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label for="fup-date">Scheduled Date <span class="text-danger">*</span></label>
+                                        <input type="date" id="fup-date" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fup-priority">Task Priority</label>
+                                        <select id="fup-priority">
+                                            <option value="Low">Low Priority</option>
+                                            <option value="Medium" selected>Medium Priority</option>
+                                            <option value="High">High Priority</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i data-lucide="bell"></i> Set Operational Reminder
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- List tracking Table -->
+                        <div class="glass-panel">
+                            <h3>Scheduled Reminders Stream</h3>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Task Description</th>
+                                            <th>Scheduled Date</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="followups-list-table">
+                                        <tr><td colspan="5" class="text-center">Loading reminders list...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- TAB 11: WORKFLOW AUDIT CHECK ENGINE -->
+                <section class="tab-pane" id="pane-logs">
+                    <div class="page-title">
+                        <h2>Workflow Audit Logs</h2>
+                        <p>Stream logs verifying database updates and operations history in Manikanta Enterprises CRM.</p>
+                    </div>
+                    
+                    <div class="glass-panel">
+                        <div class="panel-header">
+                            <h3>System Logs Audit Trail</h3>
+                            <span class="badge badge-info"><i data-lucide="activity" style="width:10px; height:10px; margin-right:4px;"></i> Live Updates</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Log ID</th>
+                                        <th>Event Type</th>
+                                        <th>Entity Affected</th>
+                                        <th>Entity ID Reference</th>
+                                        <th>Execution Status</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="workflow-logs-stream-table">
+                                    <tr><td colspan="6" class="text-center">Loading logs audit stream...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+    </div>
+
+    <!-- ================= MODALS & POPUPS POPULATORS ================= -->
+
+    <!-- DEALER PROFILE / INTERACTION LOGS MODAL -->
+    <div class="modal" id="modal-dealer-profile">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-dealer-name">Dealer Details</h3>
+                <span class="modal-close" id="btn-close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="grid-2">
+                    <div class="dealer-profile-info">
+                        <h4>Account Specifications</h4>
+                        <div class="info-block"><strong>Type:</strong> <span id="md-type">Dealer</span></div>
+                        <div class="info-block"><strong>Phone:</strong> <span id="md-phone">9999999999</span></div>
+                        <div class="info-block"><strong>Email:</strong> <span id="md-email">-</span></div>
+                        <div class="info-block"><strong>Address:</strong> <span id="md-address">-</span></div>
+                        <div class="info-block"><strong>Credit Limit:</strong> Rs <span id="md-credit-limit">0.00</span></div>
+                        <div class="info-block"><strong>Outstanding Balance:</strong> Rs <span id="md-balance">0.00</span></div>
+                        <div class="info-block"><strong>Executive Owner:</strong> <span id="md-owner">Unassigned</span></div>
+                        <div class="info-block"><strong>Next Follow Up:</strong> <span id="md-follow-up">No date set</span></div>
+                    </div>
+                    
+                    <div class="dealer-actions-notes">
+                        <h4>Add Follow-up Note / Call log</h4>
+                        <form id="form-modal-add-note">
+                            <input type="hidden" id="md-dealer-id">
+                            <div class="form-group">
+                                <label for="md-note-text">Conversation summary <span class="text-danger">*</span></label>
+                                <textarea id="md-note-text" required placeholder="Write details about the call outcome..."></textarea>
+                            </div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label for="md-note-followup">Next Follow Up Date</label>
+                                    <input type="date" id="md-note-followup">
+                                </div>
+                                <div class="form-group">
+                                    <label for="md-note-owner">Executive Name</label>
+                                    <input type="text" id="md-note-owner" required value="Srinivas Rao">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Add Log & Schedule</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <hr class="panel-divider">
+                
+                <div class="grid-2 mt-20">
+                    <div class="order-history-section">
+                        <h4>Recent Sales Orders</h4>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="md-orders-history"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-history-section">
+                        <h4>Contact Notes Timeline</h4>
+                        <div class="timeline" id="md-notes-timeline"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Client App -->
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2.1"></script>
+</body>
+</html>
