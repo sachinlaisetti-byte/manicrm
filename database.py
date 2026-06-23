@@ -328,6 +328,213 @@ def fetch_workflow_logs(conn, limit=50):
         print(f"fetch_workflow_logs failed: {e}")
     return logs
 
+def seed_demo_data(conn):
+    if conn.engine_type == "mongodb":
+        return
+    cursor = conn.cursor()
+
+    # Only seed if products table is empty
+    cursor.execute("SELECT COUNT(*) AS cnt FROM products")
+    if scalar_from_row(cursor.fetchone()) > 0:
+        return
+
+    print("Seeding demo data...")
+
+    # ── Products ──
+    products = [
+        ("SKU-CMT-001", "SKU-CMT-001", "UltraTech Cement 53 Grade", "Cement", 380.0, 380.0, 320.0),
+        ("SKU-CMT-002", "SKU-CMT-002", "ACC Cement 43 Grade", "Cement", 350.0, 350.0, 295.0),
+        ("SKU-STL-001", "SKU-STL-001", "JSW Steel Rebar 12mm", "Steel", 720.0, 720.0, 610.0),
+        ("SKU-STL-002", "SKU-STL-002", "Tata TMT Bar 16mm", "Steel", 750.0, 750.0, 640.0),
+        ("SKU-FIN-001", "SKU-FIN-001", "Birla White Wall Putty", "Finishing", 280.0, 280.0, 220.0),
+        ("SKU-PNT-001", "SKU-PNT-001", "Asian Paint Royale (10L)", "Paint", 450.0, 450.0, 380.0),
+        ("SKU-PNT-002", "SKU-PNT-002", "Nippon Paint Weatherproof (20L)", "Paint", 520.0, 520.0, 440.0),
+        ("SKU-TLE-001", "SKU-TLE-001", "Kajaria Vitrified Tiles 2x2", "Tiles", 680.0, 680.0, 560.0),
+        ("SKU-TLE-002", "SKU-TLE-002", "Somany Floor Tiles 1x1", "Tiles", 420.0, 420.0, 350.0),
+        ("SKU-PLM-001", "SKU-PLM-001", "Jaquar CPVC Pipe 1inch", "Plumbing", 180.0, 180.0, 130.0),
+        ("SKU-BTH-001", "SKU-BTH-001", "Hindware Sanitaryware Set", "Bathroom", 1200.0, 1200.0, 980.0),
+        ("SKU-ELC-001", "SKU-ELC-001", "Polycab Wire 1.5sqmm (90m)", "Electrical", 95.0, 95.0, 72.0),
+    ]
+    for sku_id, sku, name, cat, up, price, cost in products:
+        cursor.execute(
+            "INSERT INTO products (sku_id, sku, name, category, unit_price, price, cost) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (sku_id, sku, name, cat, up, price, cost)
+        )
+
+    # ── Warehouse Stock ──
+    stock = [(1, 500, 50, "A1"), (2, 300, 40, "A2"), (3, 200, 20, "B1"), (4, 150, 15, "B2"),
+             (5, 400, 30, "C1"), (6, 100, 10, "C2"), (7, 80, 8, "D1"), (8, 250, 25, "D2"),
+             (9, 180, 18, "E1"), (10, 600, 60, "E2"), (11, 40, 5, "F1"), (12, 300, 30, "F2")]
+    for pid, qty, thr, bin_loc in stock:
+        cursor.execute(
+            "INSERT INTO warehouse_stock (product_id, quantity, safety_threshold, bin_location) VALUES (?, ?, ?, ?)",
+            (pid, qty, thr, bin_loc)
+        )
+
+    # ── Dealers ──
+    dealers = [
+        ("Sri Sai Cement Traders", "srisai@email.com", "9000000001", "Guntur, AP", "Dealer", 500000.0, 125000.0, "Active", "Srinivas", "2026-08-15"),
+        ("Venkateswara Steel Corp", "venkateswara@email.com", "9000000002", "Vijayawada, AP", "Dealer", 800000.0, 210000.0, "Active", "Rajesh", "2026-08-10"),
+        ("Krishna Building Materials", "krishna@email.com", "9000000003", "Visakhapatnam, AP", "Dealer", 300000.0, 45000.0, "Active", "Srinivas", "2026-07-25"),
+        ("Anjani Hardware & Sanitary", "anjani@email.com", "9000000004", "Kakinada, AP", "Retailer", 100000.0, 12000.0, "Active", "Kalyan", "2026-08-20"),
+        ("Priya Infrastructure", "priya@email.com", "9000000005", "Rajahmundry, AP", "Dealer", 600000.0, 89000.0, "Active", "Rajesh", None),
+        ("Ganesh Plywood & Hardware", "ganesh@email.com", "9000000006", "Eluru, AP", "Retailer", 75000.0, 5000.0, "Active", "Kalyan", "2026-08-05"),
+        ("Lakshmi Cement Agency", "lakshmi@email.com", "9000000007", "Ongole, AP", "Dealer", 400000.0, 98000.0, "Active", "Srinivas", "2026-07-30"),
+        ("Durga TMT & Steel", "durga@email.com", "9000000008", "Nellore, AP", "Dealer", 350000.0, 110000.0, "Blocked", "Rajesh", "2026-06-15"),
+        ("Sai Ram Enterprises", "sairam@email.com", "9000000009", "Tirupati, AP", "Dealer", 550000.0, 76000.0, "Active", "Kalyan", None),
+        ("Navayuga Traders", "navayuga@email.com", "9000000010", "Kurnool, AP", "Retailer", 125000.0, 0.0, "Active", "Srinivas", "2026-09-01"),
+    ]
+    for d in dealers:
+        cursor.execute(
+            "INSERT INTO dealers (name, email, phone, address, type, credit_limit, balance, status, owner, follow_up_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            d
+        )
+
+    # ── Customers ──
+    customers = [
+        ("R. Venkata Rao", "Venkat Constructions", "9876543210", "rv@email.com", "Guntur"),
+        ("M. Surya Prakash", "Surya Builders", "9876543211", "surya@email.com", "Vijayawada"),
+        ("K. Naga Raju", "Naga Constructions", "9876543212", "naga@email.com", "Visakhapatnam"),
+        ("D. Srinivas Rao", "Srinivas Estates", "9876543213", "dsr@email.com", "Rajahmundry"),
+        ("P. Rama Krishna", "RK Developers", "9876543214", "rk@email.com", "Kakinada"),
+        ("S. V. Prasad", "Prasad & Sons", "9876543215", "svp@email.com", "Nellore"),
+        ("G. Narasimha", "Narasimha Infrastructure", "9876543216", "gn@email.com", "Tirupati"),
+        ("T. Subba Rao", "Subba Rao Associates", "9876543217", "tsr@email.com", "Eluru"),
+        ("A. Chandra Sekhar", "Chandra Constructions", "9876543218", "acs@email.com", "Ongole"),
+        ("B. Madhu Sudhan", "Madhu Developers", "9876543219", "bms@email.com", "Kurnool"),
+    ]
+    for c in customers:
+        cursor.execute(
+            "INSERT INTO customers (name, company, phone, email, address) VALUES (?, ?, ?, ?, ?)",
+            c
+        )
+
+    # ── Vendor Purchases ──
+    from datetime import datetime, timedelta
+    base = datetime.now()
+    purchases = []
+    vendor_purchase_data = [
+        ("UltraTech Supply Co", 1, 1000, 300.0, "2026-05-10"),
+        ("ACC Distributors", 2, 800, 280.0, "2026-05-12"),
+        ("JSW Steel Depot", 3, 500, 590.0, "2026-05-15"),
+        ("Tata Steel Supply", 4, 300, 620.0, "2026-05-18"),
+        ("Birla White Dealer", 5, 600, 210.0, "2026-05-20"),
+        ("Asian Paint Wholesale", 6, 200, 370.0, "2026-05-22"),
+        ("Nippon Paint Logistics", 7, 150, 430.0, "2026-05-25"),
+        ("Kajaria Tile Mart", 8, 400, 540.0, "2026-05-28"),
+        ("Somany Showroom", 9, 350, 340.0, "2026-06-01"),
+        ("Jaquar Distributors", 10, 800, 125.0, "2026-06-03"),
+        ("Hindware Bath Fittings", 11, 100, 960.0, "2026-06-05"),
+        ("Polycab Cable Co", 12, 500, 68.0, "2026-06-07"),
+    ]
+    for vendor, pid, qty, unit_cost, date_str in vendor_purchase_data:
+        total = qty * unit_cost
+        cursor.execute(
+            "INSERT INTO vendor_purchases (vendor_name, product_id, quantity, unit_cost, total_amount, status, purchase_date) VALUES (?, ?, ?, ?, ?, 'Paid', ?)",
+            (vendor, pid, qty, unit_cost, total, date_str)
+        )
+
+    # ── Sales Orders ──
+    orders_data = [
+        (1, "2026-05-20", "Paid", [
+            (1, 100, 380.0), (5, 50, 280.0)
+        ]),
+        (2, "2026-05-25", "Paid", [
+            (3, 80, 720.0), (4, 40, 750.0)
+        ]),
+        (3, "2026-06-01", "Pending", [
+            (2, 60, 350.0), (8, 30, 680.0)
+        ]),
+        (4, "2026-06-05", "Paid", [
+            (6, 25, 450.0), (7, 15, 520.0)
+        ]),
+        (5, "2026-06-10", "Pending", [
+            (1, 200, 380.0), (3, 50, 720.0), (10, 100, 180.0)
+        ]),
+        (6, "2026-06-15", "Paid", [
+            (11, 10, 1200.0), (12, 60, 95.0)
+        ]),
+        (7, "2026-06-18", "Pending", [
+            (5, 80, 280.0), (9, 40, 420.0)
+        ]),
+    ]
+    for dealer_id, date_str, pay_status, items in orders_data:
+        total = sum(q * up for _, q, up in items)
+        cursor.execute(
+            "INSERT INTO sales_orders (dealer_id, total_amount, payment_status, order_date) VALUES (?, ?, ?, ?)",
+            (dealer_id, total, pay_status, date_str)
+        )
+        order_id = cursor.lastrowid
+        for pid, qty, up in items:
+            cursor.execute(
+                "INSERT INTO sales_order_items (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)",
+                (order_id, pid, qty, up)
+            )
+
+    # ── Delivery Assignments ──
+    deliveries = [
+        (1, "Srinivas", "AP-32-TC-1234", "Guntur Route", "Delivered", "2026-05-22"),
+        (2, "Rajesh", "AP-32-TC-5678", "Vijayawada Route", "Delivered", "2026-05-27"),
+        (3, "Kalyan", "AP-32-TC-9012", "Visakhapatnam Route", "In Transit", "2026-06-03"),
+        (4, "Srinivas", "AP-32-TC-3456", "Kakinada Route", "Delivered", "2026-06-07"),
+        (5, "Rajesh", "AP-32-TC-7890", "Rajahmundry Route", "Pending", "2026-06-14"),
+        (6, "Kalyan", "AP-32-TC-1111", "Nellore Route", "Delivered", "2026-06-17"),
+        (7, "Srinivas", "AP-32-TC-2222", "Tirupati Route", "Pending", "2026-06-20"),
+    ]
+    for oid, person, vehicle, route, status, date_str in deliveries:
+        cursor.execute(
+            "INSERT INTO delivery_assignments (order_id, delivery_person, vehicle_no, route, status, assignment_date) VALUES (?, ?, ?, ?, ?, ?)",
+            (oid, person, vehicle, route, status, date_str)
+        )
+
+    # ── Follow-ups ──
+    followups = [
+        ("Follow up on payment", "Dealer #3 has pending balance of ₹45,000", "2026-07-25", "High", "Pending"),
+        ("Credit limit review", "Review credit limit increase for Dealer #2", "2026-08-10", "Medium", "Pending"),
+        ("New product demo", "Schedule UltraTech Cement demo for Dealer #5", "2026-08-01", "Low", "Completed"),
+        ("Quarterly meeting", "Quarterly business review with top 5 dealers", "2026-08-15", "High", "Pending"),
+        ("Site visit", "Visit Dealer #1 for stock verification", "2026-07-30", "Medium", "Pending"),
+    ]
+    for title, notes, sched, priority, status in followups:
+        cursor.execute(
+            "INSERT INTO follow_ups (title, notes, scheduled_date, priority, status) VALUES (?, ?, ?, ?, ?)",
+            (title, notes, sched, priority, status)
+        )
+
+    # ── Follow-up Notes ──
+    fnotes = [
+        (1, "Discussed pending payment of ₹1,25,000. Promised to clear by next week.", "2026-07-20", "2026-08-15", "Srinivas"),
+        (2, "Requested additional steel stock. Order placed for 100 units.", "2026-07-18", "2026-08-10", "Rajesh"),
+        (3, "New credit limit approved at ₹5,00,000. Documentation completed.", "2026-07-15", "2026-07-25", "Srinivas"),
+        (5, "Dealer interested in new paint product line. Demo scheduled.", "2026-07-22", "2026-08-01", "Kalyan"),
+        (7, "Complaint about delayed delivery resolved. Compensation provided.", "2026-07-12", None, "Rajesh"),
+    ]
+    for did, note, cdate, next_fu, owner in fnotes:
+        cursor.execute(
+            "INSERT INTO follow_up_notes (dealer_id, note, contact_date, next_follow_up, owner) VALUES (?, ?, ?, ?, ?)",
+            (did, note, cdate, next_fu, owner)
+        )
+
+    # ── Workflow Logs ──
+    logs = [
+        ("AUTH_LOGIN", "USER", 1, "Success"),
+        ("CREATE_DEALER", "DEALER", 1, "Success"),
+        ("CREATE_ORDER", "ORDER", 1, "Success"),
+        ("DELIVERY_COMPLETE", "DELIVERY", 1, "Success"),
+        ("CREATE_PURCHASE", "PURCHASE", 1, "Success"),
+        ("AUTH_LOGIN", "USER", 2, "Success"),
+        ("CREATE_DEALER", "DEALER", 5, "Success"),
+        ("CREATE_ORDER", "ORDER", 5, "Success"),
+    ]
+    for evt, ent, eid, status in logs:
+        cursor.execute(
+            "INSERT INTO workflow_logs (event_type, entity_type, entity_id, status) VALUES (?, ?, ?, ?)",
+            (evt, ent, eid, status)
+        )
+
+    conn.commit()
+    print("Demo data seeded successfully.")
+
 def init_db():
     conn = get_db_connection()
     if conn.engine_type == "mongodb":
@@ -528,6 +735,10 @@ def init_db():
     
     # Run structural migrations to repair live records
     run_migrations(conn)
+
+    # Seed demo data if tables are empty (showcase/testing mode)
+    seed_demo_data(conn)
+
     conn.close()
 
 if __name__ == "__main__":
