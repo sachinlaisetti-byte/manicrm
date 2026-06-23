@@ -9,7 +9,7 @@ from datetime import datetime
 # Load .env file BEFORE importing database module so DB_ENGINE and credentials are available
 try:
     from dotenv import load_dotenv
-    load_dotenv(override=True)
+    load_dotenv()
 except ImportError:
     pass  # dotenv not installed — rely on system environment variables
 
@@ -23,6 +23,10 @@ _base_dir = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__,
             template_folder=os.path.join(_base_dir, 'templates'),
             static_folder=os.path.join(_base_dir, 'static'))
+
+# Initialize database tables on module load (ensures tables exist under gunicorn)
+init_db()
+
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
 
