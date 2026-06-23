@@ -19,7 +19,10 @@ from database import get_db_connection, scalar_from_row, init_db, fetch_workflow
 mimetypes.add_type('text/css', '.css')
 mimetypes.add_type('application/javascript', '.js')
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+_base_dir = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__,
+            template_folder=os.path.join(_base_dir, 'templates'),
+            static_folder=os.path.join(_base_dir, 'static'))
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=False)
 
 
