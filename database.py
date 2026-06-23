@@ -256,10 +256,11 @@ def get_db_connection():
     return CRMDatabaseProxy(conn, "sqlite")
 
 def run_migrations(conn):
-    """Dynamically applies schema extensions to safely append workflow lifecycle columns."""
+    """Dynamically applies schema extensions to safely append missing columns."""
     if conn.engine_type == "mongodb":
         return
 
+    import sqlite3
     cursor = conn.cursor()
     tables_to_migrate = ["sales_orders", "delivery_assignments", "vendor_purchases"]
     
@@ -278,6 +279,23 @@ def run_migrations(conn):
                 conn.commit()
         except Exception as e:
             print(f"Migration alert for table {table}: {e}")
+
+    # Migrate products table — add missing columns if not present
+    try:
+        if conn.engine_type == "sqlite":
+            cursor.execute("PRAGMA table_info(products);")
+            prod_cols = {col[1] for col in cursor.fetchall()}
+        else:
+            cursor.execute("SHOW COLUMNS FROM products;")
+            prod_cols = {col[0] for col in cursor.fetchall()}
+
+        for col_name, col_def in [("sku", "TEXT"), ("price", "REAL"), ("cost", "REAL")]:
+            if col_name not in prod_cols:
+                print(f"Migration: Adding '{col_name}' column to products table.")
+                cursor.execute(f"ALTER TABLE products ADD COLUMN {col_name} {col_def};")
+                conn.commit()
+    except Exception as e:
+        print(f"Migration alert for products table: {e}")
 
 def fetch_workflow_logs(conn, limit=50):
     """Safely retrieves workflow audit log rows from the workflow_logs table."""
@@ -392,9 +410,12 @@ def init_db():
     CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sku_id TEXT UNIQUE NOT NULL,
+        sku TEXT,
         name TEXT NOT NULL,
         category TEXT NOT NULL,
         unit_price REAL NOT NULL,
+        price REAL,
+        cost REAL,
         created_at TEXT DEFAULT (datetime('now', 'localtime'))
     );
     ''')
