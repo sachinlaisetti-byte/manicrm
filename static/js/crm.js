@@ -1,7 +1,7 @@
 // crm.js – Front‑end logic for Manikanta Customer Dealer CRM
 // ------------------------------------------------------------
 // Global state
-let googleClientId = "575061568101-4lt1m9eabuv7q7jdqps1hj568b4ch4hd.apps.googleusercontent.com";
+let googleClientId = "575061568101-uhv7p5b23hnk045rc6dk909pj047b8i2.apps.googleusercontent.com";
 let userEmail = null;
 
 // Utility: safe fetch with full error handling
